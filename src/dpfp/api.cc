@@ -77,8 +77,8 @@ static napi_value fp_get_readers(napi_env env, napi_callback_info info) {
     assert(napi_ok == napi_get_cb_info(env, info, &argc, &argv, NULL, ((void**)&api_data)));
     vector<string> readers = api_data->reader->getReaders(true);
     unsigned int cnt = readers.size();
+    assert(napi_ok == napi_create_array_with_length(env, cnt, &res));
     if (cnt > 0) {
-        assert(napi_ok == napi_create_array_with_length(env, cnt, &res));
         for (unsigned int i = 0; i < cnt; i++) {
             napi_value name;
             assert(napi_ok == napi_create_string_utf8(env, readers[i].c_str(),

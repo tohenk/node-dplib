@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-const dp = require("../dpfp");
+const dp = require("..");
 
 const MAX_FMD = 4;
-const MAX_CAPTURE = 5;
 let fmds = [];
-let capture = 0;
+let xstatus = null;
 
 dp.init();
 
@@ -37,7 +36,9 @@ function verify() {
 	dp.startAcquire((status, data) => {
 		switch (status) {
 		case 'disconnected':
-			console.log('Please connect fingerprint reader...');
+			if (xstatus != status) {
+				console.log('Please connect fingerprint reader...');
+			}
 			break;
 		case 'connected':
 			console.log('Swipe your finger to verify...');
@@ -64,6 +65,7 @@ function verify() {
 			;
 			break;
 		}
+		xstatus = status;
 	});
 }
 
@@ -73,7 +75,9 @@ function enroll() {
 	dp.startAcquire(true, (status, data) => {
 		switch (status) {
 		case 'disconnected':
-			console.log('Please connect fingerprint reader...');
+			if (xstatus != status) {
+				console.log('Please connect fingerprint reader...');
+			}
 			break;
 		case 'connected':
 			console.log('Swipe your finger to enroll...');
@@ -99,6 +103,7 @@ function enroll() {
 			});
 			break;
 		}
+		xstatus = status;
 	});
 }
 

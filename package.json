@@ -1,42 +1,37 @@
 {
-  "name": "node-dp",
-  "version": "2.0.0",
-  "description": "Digital Persona Fingerprint Bridge, a fingerprint acquisition and identification in the browser environment",
-  "productName": "Digital Persona Fingerprint Bridge",
-  "main": "main.js",
+  "name": "@ntlab/node-dplib",
+  "version": "1.0.0",
+  "description": "Digital Persona fingerprint library",
+  "main": "index.js",
   "scripts": {
-    "start": "electron .",
-    "fpserver": "node app.js --port=7978 --mode=verifier",
-    "fpproxy": "node app.js --port=7978 --mode=verifier --config=proxy.json",
-    "fpworker1": "node app.js --port=8001 --mode=verifier",
-    "fpworker2": "node app.js --port=8002 --mode=verifier",
-    "package:win": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=dist --icon=assets/icons/app.ico"
+    "install": "node-gyp rebuild",
+    "test": "node test/dplib.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tohenk/node-dp.git"
-  },
-  "dependencies": {
-    "@ntlab/ntlib": "^1.0.1",
-    "bindings": "^1.5.0",
-    "jszip": "^3.5.0",
-    "nan": "^2.14.2",
-    "socket.io": "^3.1.0",
-    "socket.io-client": "^3.1.0"
+    "url": "git+https://github.com/tohenk/node-dplib.git"
   },
   "keywords": [
     "digital persona",
     "fingerprint",
+    "U.are.U",
     "match",
     "verify",
     "identify",
     "enroll"
   ],
+  "author": "Toha <tohenk@yahoo.com>",
   "license": "MIT",
-  "devDependencies": {
-    "electron": "^10.1.5",
-    "electron-packager": "^14.2.1",
-    "electron-rebuild": "^1.11.0",
-    "electron-winstaller": "^4.0.1"
+  "bugs": {
+    "url": "https://github.com/tohenk/node-dplib/issues"
+  },
+  "homepage": "https://github.com/tohenk/node-dplib#readme",
+  "dependencies": {
+    "bindings": "^1.5.0"
+  },
+  "devDependencies": {},
+  "gypfile": true,
+  "directories": {
+    "test": "test"
   }
 }
