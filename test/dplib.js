@@ -33,78 +33,78 @@ dp.init();
 console.log('Readers: %s', JSON.stringify(dp.getReaders()));
 
 function verify() {
-	dp.startAcquire((status, data) => {
-		switch (status) {
-		case 'disconnected':
-			if (xstatus != status) {
-				console.log('Please connect fingerprint reader...');
-			}
-			break;
-		case 'connected':
-			console.log('Swipe your finger to verify...');
-			break;
-		case 'error':
-			break;
-		case 'complete':
-			dp.identify(data, fmds)
-				.then((idx) => {
-					if (idx >= 0) {
-						console.log('Finger matched at %d', idx);
-						dp.stopAcquire(() => {
-							console.log('It is done, exiting...');
-							dp.exit();
-						});
-					} else {
-						console.log('Finger not matched, try again');
-						verify();
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-				})
-			;
-			break;
-		}
-		xstatus = status;
-	});
+    dp.startAcquire((status, data) => {
+        switch (status) {
+            case 'disconnected':
+                if (xstatus != status) {
+                    console.log('Please connect fingerprint reader...');
+                }
+                break;
+            case 'connected':
+                console.log('Swipe your finger to verify...');
+                break;
+            case 'error':
+                break;
+            case 'complete':
+                dp.identify(data, fmds)
+                    .then((idx) => {
+                        if (idx >= 0) {
+                            console.log('Finger matched at %d', idx);
+                            dp.stopAcquire(() => {
+                                console.log('It is done, exiting...');
+                                dp.exit();
+                            });
+                        } else {
+                            console.log('Finger not matched, try again');
+                            verify();
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
+                    ;
+                break;
+        }
+        xstatus = status;
+    });
 }
 
 function enroll() {
-	let stage = 1;
-	let stages = dp.getFeaturesLen();
-	dp.startAcquire(true, (status, data) => {
-		switch (status) {
-		case 'disconnected':
-			if (xstatus != status) {
-				console.log('Please connect fingerprint reader...');
-			}
-			break;
-		case 'connected':
-			console.log('Swipe your finger to enroll...');
-			break;
-		case 'error':
-			console.log('Error occurred, please try again...');
-			break;
-		case 'complete':
-			console.log('Finger acquired (%d/%d)', stage, stages);
-			stage++;
-			break;
-		case 'enrolled':
-			if (data) {
-				fmds.push(data);
-			}
-			dp.stopAcquire(() => {
-				if (fmds.length < MAX_FMD) {
-					console.log('Enroll another finger...');
-					enroll();
-				} else {
-					verify();
-				}
-			});
-			break;
-		}
-		xstatus = status;
-	});
+    let stage = 1;
+    let stages = dp.getFeaturesLen();
+    dp.startAcquire(true, (status, data) => {
+        switch (status) {
+            case 'disconnected':
+                if (xstatus != status) {
+                    console.log('Please connect fingerprint reader...');
+                }
+                break;
+            case 'connected':
+                console.log('Swipe your finger to enroll...');
+                break;
+            case 'error':
+                console.log('Error occurred, please try again...');
+                break;
+            case 'complete':
+                console.log('Finger acquired (%d/%d)', stage, stages);
+                stage++;
+                break;
+            case 'enrolled':
+                if (data) {
+                    fmds.push(data);
+                }
+                dp.stopAcquire(() => {
+                    if (fmds.length < MAX_FMD) {
+                        console.log('Enroll another finger...');
+                        enroll();
+                    } else {
+                        verify();
+                    }
+                });
+                break;
+        }
+        xstatus = status;
+    });
 }
 
 enroll();
