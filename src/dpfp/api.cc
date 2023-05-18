@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -215,18 +215,36 @@ static napi_value fp_identify(napi_env env, napi_callback_info info) {
 
 static napi_value fp_init(napi_env env, napi_callback_info info) {
     napi_value res = NULL;
-    size_t argc = 0;
-    napi_value argv;
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_valuetype t;
     FP_API_DATA* api_data = NULL;
 
-    assert(napi_ok == napi_get_cb_info(env, info, &argc, &argv, NULL, ((void**)&api_data)));
-    if (argc == 0) {
-        if (!api_data->init) {
-            api_data->init = true;
-            start_fp_worker(env, api_data);
+    // Accepted signatures:
+    // init();
+    // init({parent: 0});
+
+    assert(napi_ok == napi_get_cb_info(env, info, &argc, argv, NULL, ((void**)&api_data)));
+    if (argc == 1) {
+        assert(napi_ok == napi_typeof(env, argv[0], &t));
+#ifdef _WIN32
+        if (t == napi_object) {
+                napi_value key, value;
+                bool hasParentProp;
+                assert(napi_ok == napi_create_string_utf8(env, "parent", NAPI_AUTO_LENGTH, &key));
+                assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasParentProp));
+                if (hasParentProp) {
+                    assert(napi_ok == napi_get_property(env, argv[0], key, &value));
+                    assert(napi_ok == napi_get_value_int64(env, value, &api_data->parent));
+                }
         }
-        assert(napi_ok == napi_get_boolean(env, api_data->init, &res));
+#endif
     }
+    if (!api_data->init) {
+        api_data->init = true;
+        start_fp_worker(env, api_data);
+    }
+    assert(napi_ok == napi_get_boolean(env, api_data->init, &res));
     return res;
 }
 
@@ -264,6 +282,7 @@ static FP_API_DATA* create_fp_api_data(napi_env env, napi_value exports) {
     api_data->exit = false;
 #ifdef _WIN32
     api_data->msg = NULL;
+    api_data->parent = NULL;
 #endif
     api_data->worker = {NULL};
     api_data->acquire = {true, NULL, NULL, NULL, NULL, NULL};

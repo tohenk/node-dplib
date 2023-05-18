@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -91,7 +91,7 @@ napi_value fp_start_identify(napi_env env, void* data, napi_value feature, napi_
                         assert(napi_ok == napi_reject_deferred(env, api_data->identify.deferred, err));
                         okay = false;
                         break;
-                    }                    
+                    }
                     api_data->identify.fmds[i] = buff;
                     api_data->identify.fmdlens[i] = bufflen;
                 }

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -63,6 +63,7 @@ typedef struct {
     bool exit;
 #ifdef _WIN32
     MsgWin* msg;
+    LONG_PTR parent;
 #endif
     DPFPReader* reader;
     struct {

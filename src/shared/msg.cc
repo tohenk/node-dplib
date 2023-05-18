@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,7 @@
 #include <windows.h>
 #include "msg.h"
 
-MsgWin::MsgWin()
+MsgWin::MsgWin(LONG_PTR hParent) : mhWndParent{(HWND)hParent}
 {
     mWndClass = L"FPMessageReceiver";
     mTitle = L"Fingerprint Message Receiver";
@@ -47,7 +47,7 @@ void MsgWin::CreateHandle()
     wx.lpszClassName = mWndClass;
     if (RegisterClassEx(&wx)) {
         mhWnd = CreateWindowEx(0, mWndClass, mTitle, WS_POPUP | WS_EX_DLGMODALFRAME /*| WS_VISIBLE*/,
-            0, 0, 0, 0, NULL, NULL, NULL, NULL);
+            0, 0, 0, 0, mhWndParent, NULL, NULL, NULL);
         SetWindowLongPtr(mhWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
     }
 }

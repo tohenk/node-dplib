@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +29,7 @@ static void fp_prep_message_receiver(void* data) {
 
 #ifdef _WIN32
     if (api_data->msg == NULL) {
-        api_data->msg = new MsgWin();
+        api_data->msg = new MsgWin(api_data->parent);
         api_data->msg->SetHandler(fp_handle_message);
         api_data->reader->setHandle(api_data->msg->GetHandle());
     }
