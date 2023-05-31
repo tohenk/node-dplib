@@ -229,14 +229,14 @@ static napi_value fp_init(napi_env env, napi_callback_info info) {
         assert(napi_ok == napi_typeof(env, argv[0], &t));
 #ifdef _WIN32
         if (t == napi_object) {
-                napi_value key, value;
-                bool hasParentProp;
-                assert(napi_ok == napi_create_string_utf8(env, "parent", NAPI_AUTO_LENGTH, &key));
-                assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasParentProp));
-                if (hasParentProp) {
-                    assert(napi_ok == napi_get_property(env, argv[0], key, &value));
-                    assert(napi_ok == napi_get_value_int64(env, value, &api_data->parent));
-                }
+            napi_value key, value;
+            bool hasParentProp;
+            assert(napi_ok == napi_create_string_utf8(env, "parent", NAPI_AUTO_LENGTH, &key));
+            assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasParentProp));
+            if (hasParentProp) {
+                assert(napi_ok == napi_get_property(env, argv[0], key, &value));
+                assert(napi_ok == napi_get_value_int64(env, value, &api_data->parent));
+            }
         }
 #endif
     }

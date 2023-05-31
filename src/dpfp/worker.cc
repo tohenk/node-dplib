@@ -40,7 +40,7 @@ static void fp_focus_window(void* data, bool focus) {
     FP_API_DATA* api_data = (FP_API_DATA*) data;
 
 #ifdef _WIN32
-    if (api_data->msg != NULL) {
+    if (api_data->msg != NULL && api_data->parent == NULL) {
         if (focus) {
             if (!IsWindowVisible(api_data->msg->GetHandle())) {
                 ShowWindow(api_data->msg->GetHandle(), SW_SHOW);
