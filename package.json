@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/dplib",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Digital Persona fingerprint library",
   "main": "index.js",
   "scripts": {
