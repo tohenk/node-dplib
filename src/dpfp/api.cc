@@ -234,8 +234,10 @@ static napi_value fp_init(napi_env env, napi_callback_info info) {
             assert(napi_ok == napi_create_string_utf8(env, "parent", NAPI_AUTO_LENGTH, &key));
             assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasParentProp));
             if (hasParentProp) {
+                int64_t parent;
                 assert(napi_ok == napi_get_property(env, argv[0], key, &value));
-                assert(napi_ok == napi_get_value_int64(env, value, &api_data->parent));
+                assert(napi_ok == napi_get_value_int64(env, value, &parent));
+                api_data->parent = parent;
             }
         }
 #endif
