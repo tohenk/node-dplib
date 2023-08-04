@@ -54,10 +54,22 @@
 					{
 						"include_dirs": [
 							"/opt/DigitalPersona/urusdk-linux/Include"
-						],
+						]
+					}
+				],
+				['OS=="linux" and "<@(target_arch)"=="ia32"',
+					{
 						"libraries": [
-							"/usr/lib/libdpfpdd.so",
-							"/usr/lib/libdpfj.so"
+							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x86/libdpfpdd.so",
+							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x86/libdpfj.so"
+						]
+					}
+				],
+				['OS=="linux" and "<@(target_arch)"=="x64"',
+					{
+						"libraries": [
+							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x64/libdpfpdd.so",
+							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x64/libdpfj.so"
 						]
 					}
 				]
