@@ -10,6 +10,9 @@
 				"src/dpfp/identify.cc",
 				"src/dpfp/api.cc"
 			],
+			"defines": [
+				"NAPI_VERSION=<(napi_build_version)",
+			],
 			"conditions": [
 				['OS=="win"',
 					{
