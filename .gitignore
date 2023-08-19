@@ -33,6 +33,7 @@ bower_components
 bin/
 build/
 dist/
+prebuilds/
 
 # Dependency directories
 node_modules/
