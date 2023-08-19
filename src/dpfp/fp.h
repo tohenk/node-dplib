@@ -103,7 +103,7 @@ private:
 #endif
     DPFPDD_DEV mDev;
     vector<string> mReaders;
-    size_t mReaderIdx;
+    int mReaderIdx;
     bool mInitialized;
     int mMode;
     int mStates;
@@ -163,7 +163,7 @@ public:
     vector<string> getReaders(bool query = false);
     bool setReader(char* reader);
     int getReaderIdx();
-    bool setReaderIdx(size_t reader);
+    bool setReaderIdx(int reader);
     int getMode();
     void setMode(int mode);
     bool getState(int state);

@@ -438,7 +438,7 @@ int DPFPReader::getReaderIdx()
     return mReaderIdx;
 }
 
-bool DPFPReader::setReaderIdx(size_t reader)
+bool DPFPReader::setReaderIdx(int reader)
 {
     if (reader >= 0 && reader < mReaders.size()) {
         mReaderIdx = reader;
