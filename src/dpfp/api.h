@@ -50,13 +50,21 @@ typedef struct {
     FP_ACQUIRE_OP op;
     void* data;
     unsigned int len;
+    bool clean;
 } FP_ACQUIRE_QUEUE;
 
 typedef struct {
     string status;
     void* data;
     unsigned int len;
+    bool clean;
 } FP_ACQUIRE_DATA;
+
+typedef enum {
+    FP_ACQUIRE_FLAG_CAPTURE = 0x00,
+    FP_ACQUIRE_FLAG_RAW = 0x01,
+    FP_ACQUIRE_FLAG_ENROLL = 0x02,
+} FP_ACQUIRE_FLAGS;
 
 typedef struct {
     bool init;

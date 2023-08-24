@@ -8,4 +8,5 @@ identification.
 
 ## Usage
 
-See [/test/dplib.js](/test/dplib.js) for API usage.
+* [/test/enrollment.js](/test/enrollment.js) for API usage.
+* [/test/bitmap.js](/test/bitmap.js) for raw bitmap capture.

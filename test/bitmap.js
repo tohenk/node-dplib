@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,12 +22,44 @@
  * SOFTWARE.
  */
 
-#if !defined(DPFP_ACQUIRE_H_INCLUDED)
-#define DPFP_ACQUIRE_H_INCLUDED
 
-#include "api.h"
+const fs = require('fs');
+const path = require('path');
+const dp = require('..');
 
-bool fp_start_acquire(napi_env env, void* data, unsigned int flags, napi_value callback);
-bool fp_stop_acquire(napi_env env, void* data, napi_value callback);
+let xstatus = null;
 
-#endif // !defined(DPFP_ACQUIRE_H_INCLUDED)
+dp.init();
+
+console.log('Readers:', dp.getReaders());
+
+function capture(callback) {
+    console.log('\n=== Capture raw image ===\n');
+    dp.startAcquire({raw: true}, (status, data) => {
+        switch (status) {
+            case 'disconnected':
+                if (xstatus != status) {
+                    console.log('Please connect fingerprint reader...');
+                }
+                break;
+            case 'connected':
+                console.log('Swipe your finger to capture the image...');
+                break;
+            case 'error':
+                break;
+            case 'complete':
+                dp.stopAcquire(() => {
+                    callback(data);
+                });
+                break;
+        }
+        xstatus = status;
+    });
+}
+
+capture(async data => {
+    const filename = path.join(process.cwd(), 'finger.bmp');
+    fs.writeFileSync(filename, Buffer.from(data));
+    console.log(`Saved to ${filename}`);
+    dp.exit();
+});

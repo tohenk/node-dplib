@@ -115,13 +115,15 @@ static napi_value fp_acquire_start(napi_env env, napi_callback_info info) {
     size_t argc = 2;
     napi_value argv[2];
     napi_valuetype t;
-    bool enroll = false;
+    unsigned int flags = FP_ACQUIRE_FLAG_CAPTURE;
+    bool bVal;
     FP_API_DATA* api_data = NULL;
 
     // Accepted signatures:
     // startAcquire(() => {});
     // startAcquire(true, () => {});
     // startAcquire({enroll: true}, () => {});
+    // startAcquire({raw: true}, () => {});
 
     assert(napi_ok == napi_get_cb_info(env, info, &argc, argv, NULL, ((void**)&api_data)));
     int idx = 0;
@@ -132,16 +134,33 @@ static napi_value fp_acquire_start(napi_env env, napi_callback_info info) {
         {
             case napi_object:
                 napi_value key, value;
-                bool hasEnrollProp;
+                bool hasProp;
                 assert(napi_ok == napi_create_string_utf8(env, "enroll", NAPI_AUTO_LENGTH, &key));
-                assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasEnrollProp));
-                if (hasEnrollProp) {
+                assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasProp));
+                if (hasProp) {
+                    bVal = false;
                     assert(napi_ok == napi_get_property(env, argv[0], key, &value));
-                    assert(napi_ok == napi_get_value_bool(env, value, &enroll));
+                    assert(napi_ok == napi_get_value_bool(env, value, &bVal));
+                    if (bVal) {
+                        flags |= FP_ACQUIRE_FLAG_ENROLL;
+                    }
+                }
+                assert(napi_ok == napi_create_string_utf8(env, "raw", NAPI_AUTO_LENGTH, &key));
+                assert(napi_ok == napi_has_own_property(env, argv[0], key, &hasProp));
+                if (hasProp) {
+                    bVal = false;
+                    assert(napi_ok == napi_get_property(env, argv[0], key, &value));
+                    assert(napi_ok == napi_get_value_bool(env, value, &bVal));
+                    if (bVal) {
+                        flags |= FP_ACQUIRE_FLAG_RAW;
+                    }
                 }
                 break;
             case napi_boolean:
-                assert(napi_ok == napi_get_value_bool(env, argv[0], &enroll));
+                assert(napi_ok == napi_get_value_bool(env, argv[0], &bVal));
+                if (bVal) {
+                    flags |= FP_ACQUIRE_FLAG_ENROLL;
+                }
                 break;
             default:
                 napi_throw_type_error(env, NULL, "Object required!");
@@ -152,7 +171,7 @@ static napi_value fp_acquire_start(napi_env env, napi_callback_info info) {
     if (idx >= 0) {
         assert(napi_ok == napi_typeof(env, argv[idx], &t));
         if (t == napi_function) {
-            fp_start_acquire(env, api_data, enroll, argv[idx]);
+            fp_start_acquire(env, api_data, flags, argv[idx]);
         } else {
             napi_throw_type_error(env, NULL, "Callback is not a function!");
         }

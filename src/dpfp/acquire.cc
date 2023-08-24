@@ -44,6 +44,7 @@ void fp_capture_handler(void* data) {
         q.op = FP_ACQUIRE_CAPTURE;
         q.data = api_data->reader->getFeature();
         q.len = api_data->reader->getFeatureSize();
+        q.clean = api_data->reader->getRaw();
         api_data->acquire.q->push(q);
     }
 }
@@ -56,6 +57,7 @@ void fp_enroll_handler(void* data) {
         q.op = FP_ACQUIRE_ENROLL;
         q.data = api_data->reader->getFmd();
         q.len = api_data->reader->getFmdSize();
+        q.clean = false;
         api_data->acquire.q->push(q);
     }
 }
@@ -76,6 +78,11 @@ static void fp_start_acquire_call(napi_env env, napi_value cb, void* context, vo
 #ifdef __linux__
             memcpy(buff, info.data, info.len);
 #endif
+            if (info.clean) {
+                delete [] info.data;
+                info.data = NULL;
+                info.len = 0;
+            }
         } else {
             assert(napi_ok == napi_get_undefined(env, &argv[1]));
         }
@@ -103,6 +110,7 @@ static void fp_do_start_acquire(napi_env env, void* data) {
                 FP_ACQUIRE_QUEUE q = api_data->acquire.q->front();
                 FP_ACQUIRE_DATA* d = new FP_ACQUIRE_DATA;
                 d->data = NULL;
+                d->clean = q.clean;
                 switch (q.op)
                 {
                     case FP_ACQUIRE_READER:
@@ -156,7 +164,7 @@ static void fp_start_acquire_done(napi_env env, napi_status status, void* data) 
     api_data->acquire.fn = NULL;
 }
 
-bool fp_start_acquire(napi_env env, void* data, bool enroll, napi_value callback) {
+bool fp_start_acquire(napi_env env, void* data, unsigned int flags, napi_value callback) {
     FP_API_DATA* api_data = (FP_API_DATA*) data;
     napi_value work_name;
 
@@ -168,7 +176,12 @@ bool fp_start_acquire(napi_env env, void* data, bool enroll, napi_value callback
         assert(napi_ok == napi_create_async_work(env, NULL, work_name, fp_do_start_acquire, fp_start_acquire_done,
             api_data, &(api_data->acquire.work)));
         api_data->acquire.stopped = false;
-        api_data->reader->setMode(enroll ? DPFPReader::MODE_ENROLL : DPFPReader::MODE_CONTINOUS_CAPTURE);
+        if ((flags & FP_ACQUIRE_FLAG_ENROLL) == FP_ACQUIRE_FLAG_ENROLL) {
+            api_data->reader->setMode(DPFPReader::MODE_ENROLL);
+        } else {
+            api_data->reader->setMode(DPFPReader::MODE_CONTINOUS_CAPTURE);
+            api_data->reader->setRaw((flags & FP_ACQUIRE_FLAG_RAW) == FP_ACQUIRE_FLAG_RAW);
+        }
         assert(napi_ok == napi_queue_async_work(env, api_data->acquire.work));
         return true;
     }

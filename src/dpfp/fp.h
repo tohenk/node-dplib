@@ -44,7 +44,7 @@
 #define DPFP_IDENTIFICATION_LEN 16;
 
 #ifdef DPFP_DBG
-#define fp_dbg(...) printf(__VA_ARGS__)
+#define fp_dbg(...) printf("dplib: " __VA_ARGS__)
 #else
 #define fp_dbg(...)
 #endif
@@ -108,6 +108,7 @@ private:
     int mMode;
     int mStates;
     DPFP_TICK* mTicks;
+    bool mRaw;
     unsigned char* mFeature;
     unsigned int mFeatureSize;
     unsigned char* mFmd;
@@ -132,6 +133,8 @@ private:
     void notifyReader();
     void notifyCapture();
     void notifyEnroll();
+    unsigned char* getBitmap(const DPFPDD_IMAGE_INFO* pImageInfo, const unsigned char* pImageData,
+        unsigned int* sz);
     unsigned char* extractFeature(DPFPDD_CAPTURE_CALLBACK_DATA_0* data,
         DPFJ_FMD_FORMAT fmt, unsigned int* sz);
     void handleCapture(DPFPDD_CAPTURE_CALLBACK_DATA_0* data);
@@ -171,6 +174,8 @@ public:
     void setReaderHandler(DPFP_READER_HANDLER handler);
     void setCaptureHandler(DPFP_CAPTURE_HANDLER handler);
     void setEnrollHandler(DPFP_ENROLL_HANDLER handler);
+    bool getRaw();
+    void setRaw(bool raw);
     unsigned char* getFeature() const;
     unsigned int getFeatureSize();
     unsigned char* getFmd() const;

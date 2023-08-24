@@ -32,6 +32,7 @@ DPFPReader::DPFPReader():
     mMode(MODE_CAPTURE),
     mDev(NULL),
     mReaderIdx(-1),
+    mRaw(false),
     mFeature(NULL),
     mFeatureSize(0),
     mFmd(NULL),
@@ -154,7 +155,7 @@ bool DPFPReader::prepareCapture()
         if (!inState(STATE_PREP_CAPTURE)) {
             DPFPDD_CAPTURE_PARAM cp = {0};
             cp.size = sizeof(cp);
-            cp.image_fmt = DPFPDD_IMG_FMT_ISOIEC19794;
+            cp.image_fmt = mRaw ? DPFPDD_IMG_FMT_PIXEL_BUFFER : DPFPDD_IMG_FMT_ISOIEC19794;
             cp.image_proc = DPFPDD_IMG_PROC_NONE;
             cp.image_res = 500;
             int ret = dpfpdd_capture_async(mDev, &cp, this, captureCallback);
@@ -266,6 +267,63 @@ void DPFPReader::notifyEnroll()
     }
 }
 
+unsigned char* DPFPReader::getBitmap(const DPFPDD_IMAGE_INFO* pImageInfo, const unsigned char* pImageData,
+    unsigned int* sz)
+{
+    // we work only with 8bpp images
+    if (8 != pImageInfo->bpp) {
+        return NULL;
+    }
+
+#ifdef _WIN32
+    size_t bmpHeaderSize = sizeof(BITMAPFILEHEADER);
+    size_t nPackedRowSize = (pImageInfo->width / sizeof(LONG)) + ((pImageInfo->width % sizeof(LONG)) ? 1 : 0 );
+    nPackedRowSize *= sizeof(LONG);
+    size_t nOffsetToDIBits = sizeof(BITMAPINFO) + (256 - 1) * sizeof(RGBQUAD);
+    *sz = bmpHeaderSize + nOffsetToDIBits + nPackedRowSize * pImageInfo->height;
+    unsigned char* pBuffer = new unsigned char[*sz];
+    if (pBuffer != NULL) {
+        // bmp header
+        BITMAPFILEHEADER* pbf = (BITMAPFILEHEADER*) pBuffer;
+        pbf->bfType = 0x4d42;
+        pbf->bfSize = *sz;
+        pbf->bfReserved1 = 0;
+        pbf->bfReserved2 = 0;
+        pbf->bfOffBits = nOffsetToDIBits;
+        // dib header
+        BITMAPINFO* pbmi = (BITMAPINFO*) (pBuffer + bmpHeaderSize);
+        pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        pbmi->bmiHeader.biWidth = pImageInfo->width;
+        pbmi->bmiHeader.biHeight = pImageInfo->height;
+        pbmi->bmiHeader.biPlanes = 1;
+        pbmi->bmiHeader.biBitCount = pImageInfo->bpp;
+        pbmi->bmiHeader.biCompression = BI_RGB;
+        pbmi->bmiHeader.biSizeImage = 0;
+        pbmi->bmiHeader.biXPelsPerMeter = 0;
+        pbmi->bmiHeader.biYPelsPerMeter = 0;
+        pbmi->bmiHeader.biClrUsed = 0;
+        pbmi->bmiHeader.biClrImportant = 0;
+        // color table
+        for(int i = 0; i < 256; i++) { 
+            pbmi->bmiColors[i].rgbBlue = i;
+            pbmi->bmiColors[i].rgbGreen = i;
+            pbmi->bmiColors[i].rgbRed = i;
+            pbmi->bmiColors[i].rgbReserved = 0;
+        }
+        // di bits
+        unsigned char* pDIBits = pBuffer + bmpHeaderSize + nOffsetToDIBits;
+        for (unsigned int row = 0; row < pImageInfo->height; row++){
+            unsigned char* pDest = pDIBits + (pImageInfo->height - 1 - row) * nPackedRowSize;
+            const unsigned char* pSrc = pImageData + pImageInfo->width * row;
+            memcpy_s(pDest, pImageInfo->width, pSrc, pImageInfo->width);
+        }
+    }
+    return pBuffer;
+#else
+    return NULL;
+#endif
+}
+
 unsigned char* DPFPReader::extractFeature(DPFPDD_CAPTURE_CALLBACK_DATA_0* data,
     DPFJ_FMD_FORMAT fmt, unsigned int* sz)
 {
@@ -299,8 +357,17 @@ void DPFPReader::handleCapture(DPFPDD_CAPTURE_CALLBACK_DATA_0* data)
     fp_dbg("Handle capture\n");
     if (mFeature != NULL)
         delete [] mFeature;
-    mFeature = extractFeature(data, mCaptureFormat, &mFeatureSize);
-    if (mFeature != NULL) {
+    bool success;
+    if (mRaw) {
+        if (data->capture_result.success) {
+            mFeature = getBitmap(&data->capture_result.info, data->image_data, &mFeatureSize);
+            success = mFeature != NULL;
+        }
+    } else {
+        mFeature = extractFeature(data, mCaptureFormat, &mFeatureSize);
+        success = mFeature != NULL;
+    }
+    if (success) {
         stopCapture(false);
         notifyCapture();
     }
@@ -480,6 +547,16 @@ void DPFPReader::setCaptureHandler(DPFP_CAPTURE_HANDLER handler)
 void DPFPReader::setEnrollHandler(DPFP_ENROLL_HANDLER handler)
 {
     mEnrollHandler = handler;
+}
+
+bool DPFPReader::getRaw()
+{
+    return mRaw;
+}
+
+void DPFPReader::setRaw(bool raw)
+{
+    mRaw = raw;
 }
 
 unsigned char* DPFPReader::getFeature() const
