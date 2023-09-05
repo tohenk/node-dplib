@@ -34,7 +34,7 @@
 						]
 					}
 				],
-				['OS=="win" and "<@(target_arch)"=="ia32"',
+				['OS=="win" and target_arch=="ia32"',
 					{
 						"libraries": [
 							"<!(echo %ProgramFiles%)/DigitalPersona/U.are.U SDK/Windows/Lib/win32/dpfpdd.lib",
@@ -42,7 +42,7 @@
 						]
 					}
 				],
-				['OS=="win" and "<@(target_arch)"=="x64"',
+				['OS=="win" and target_arch=="x64"',
 					{
 						"libraries": [
 							"<!(echo %ProgramFiles%)/DigitalPersona/U.are.U SDK/Windows/Lib/x64/dpfpdd.lib",
@@ -57,7 +57,7 @@
 						]
 					}
 				],
-				['OS=="linux" and "<@(target_arch)"=="ia32"',
+				['OS=="linux" and target_arch=="ia32"',
 					{
 						"libraries": [
 							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x86/libdpfpdd.so",
@@ -65,7 +65,7 @@
 						]
 					}
 				],
-				['OS=="linux" and "<@(target_arch)"=="x64"',
+				['OS=="linux" and target_arch=="x64"',
 					{
 						"libraries": [
 							"/opt/DigitalPersona/urusdk-linux/Linux/lib/x64/libdpfpdd.so",
@@ -75,5 +75,12 @@
 				]
 			]
 		}
-	]
+	],
+	"target_defaults": {
+		"configurations": {
+			"Debug": {
+				"defines": ["DPFP_DBG"]
+			}
+		}
+	}
 }

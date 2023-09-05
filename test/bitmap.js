@@ -28,13 +28,19 @@ const path = require('path');
 const dp = require('..');
 
 let xstatus = null;
+let seq = 0;
 
 dp.init();
 
 console.log('Readers:', dp.getReaders());
+console.log('\n=== Capture raw image, press Ctrl+C to end ===\n');
+
+process.on('SIGINT', () => {
+    console.log('Please wait doing cleanup...')
+    dp.exit();
+});
 
 function capture(callback) {
-    console.log('\n=== Capture raw image ===\n');
     dp.startAcquire({raw: true}, (status, data) => {
         switch (status) {
             case 'disconnected':
@@ -57,9 +63,22 @@ function capture(callback) {
     });
 }
 
-capture(async data => {
-    const filename = path.join(process.cwd(), 'finger.bmp');
-    fs.writeFileSync(filename, Buffer.from(data));
-    console.log(`Saved to ${filename}`);
-    dp.exit();
-});
+(function f() {
+    capture(async data => {
+        let filename;
+        try {
+            while (true) {
+                filename = path.join(process.cwd(), `finger${++seq > 0 ? seq : ''}.bmp`);
+                if (!fs.existsSync(filename)) {
+                    break;
+                }
+            }
+            fs.writeFileSync(filename, Buffer.from(data));
+            console.log(`Saved to ${filename}`);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        f();
+    });
+})();

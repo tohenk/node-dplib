@@ -44,7 +44,6 @@ void fp_capture_handler(void* data) {
         q.op = FP_ACQUIRE_CAPTURE;
         q.data = api_data->reader->getFeature();
         q.len = api_data->reader->getFeatureSize();
-        q.clean = api_data->reader->getRaw();
         api_data->acquire.q->push(q);
     }
 }
@@ -57,7 +56,6 @@ void fp_enroll_handler(void* data) {
         q.op = FP_ACQUIRE_ENROLL;
         q.data = api_data->reader->getFmd();
         q.len = api_data->reader->getFmdSize();
-        q.clean = false;
         api_data->acquire.q->push(q);
     }
 }
@@ -78,11 +76,6 @@ static void fp_start_acquire_call(napi_env env, napi_value cb, void* context, vo
 #ifdef __linux__
             memcpy(buff, info.data, info.len);
 #endif
-            if (info.clean) {
-                delete [] info.data;
-                info.data = NULL;
-                info.len = 0;
-            }
         } else {
             assert(napi_ok == napi_get_undefined(env, &argv[1]));
         }
@@ -110,7 +103,6 @@ static void fp_do_start_acquire(napi_env env, void* data) {
                 FP_ACQUIRE_QUEUE q = api_data->acquire.q->front();
                 FP_ACQUIRE_DATA* d = new FP_ACQUIRE_DATA;
                 d->data = NULL;
-                d->clean = q.clean;
                 switch (q.op)
                 {
                     case FP_ACQUIRE_READER:

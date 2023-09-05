@@ -50,14 +50,12 @@ typedef struct {
     FP_ACQUIRE_OP op;
     void* data;
     unsigned int len;
-    bool clean;
 } FP_ACQUIRE_QUEUE;
 
 typedef struct {
     string status;
     void* data;
     unsigned int len;
-    bool clean;
 } FP_ACQUIRE_DATA;
 
 typedef enum {
